@@ -1,0 +1,14 @@
+2026-11-17T14:00:00.000000Z	   10 Query	CREATE DATABASE sales_norm
+2026-11-17T14:00:01.000000Z	   10 Query	USE sales_norm
+2026-11-17T14:00:02.000000Z	   10 Query	CREATE TABLE sales_unnormalized (...)
+2026-11-17T14:00:03.000000Z	   10 Query	INSERT INTO sales_unnormalized VALUES (5001, '2026-11-01', 101, ...)
+2026-11-17T14:00:04.000000Z	   10 Query	CREATE TABLE clients (client_id INT PRIMARY KEY, client_name VARCHAR(100), client_city VARCHAR(100))
+2026-11-17T14:00:05.000000Z	   10 Query	CREATE TABLE products (product_id INT PRIMARY KEY, product_name VARCHAR(100), unit_price DECIMAL(10,2))
+2026-11-17T14:00:06.000000Z	   10 Query	CREATE TABLE sales (sale_id INT PRIMARY KEY, sale_date DATE, client_id INT)
+2026-11-17T14:00:07.000000Z	   10 Query	CREATE TABLE sale_items (sale_id INT, product_id INT, quantity INT)
+2026-11-17T14:00:08.000000Z	   10 Query	INSERT INTO clients SELECT DISTINCT client_id, client_name, client_city FROM sales_unnormalized
+2026-11-17T14:00:09.000000Z	   10 Query	INSERT INTO products SELECT DISTINCT product_id, product_name, unit_price FROM sales_unnormalized
+2026-11-17T14:00:10.000000Z	   10 Query	INSERT INTO sales SELECT DISTINCT sale_id, sale_date, client_id FROM sales_unnormalized
+2026-11-17T14:00:11.000000Z	   10 Query	INSERT INTO sale_items SELECT sale_id, product_id, quantity FROM sales_unnormalized
+2026-11-17T14:00:12.000000Z	   10 Query	SELECT SUM(unit_price * quantity) AS total_before FROM sales_unnormalized
+2026-11-17T14:00:13.000000Z	   10 Query	SELECT c.client_name, SUM(p.unit_price * si.quantity) AS total_spent FROM sales s JOIN clients c ON s.client_id = c.client_id JOIN sale_items si ON s.sale_id = si.sale_id JOIN products p ON si.product_id = p.product_id WHERE c.client_name = 'Иванов Иван' GROUP BY c.client_name
